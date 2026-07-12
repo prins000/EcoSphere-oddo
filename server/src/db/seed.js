@@ -164,10 +164,12 @@ async function seed() {
 
     // ── Policy Acknowledgements ─────────────────────────
     console.log('✅ Creating policy acknowledgements...');
-    await client.query(`
-      INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES
-        ($1, $3), ($4, $3), ($4, $5), ($1, $6), ($7, $3)
-    `, [users.employee, null, policyIds[0], users.dev1, policyIds[1], policyIds[2], users.ops1]);
+    await client.query(`INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES ($1, $2)`, [users.employee, policyIds[0]]);
+    await client.query(`INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES ($1, $2)`, [users.dev1, policyIds[0]]);
+    await client.query(`INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES ($1, $2)`, [users.dev1, policyIds[1]]);
+    await client.query(`INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES ($1, $2)`, [users.employee, policyIds[2]]);
+    await client.query(`INSERT INTO policy_acknowledgements (user_id, policy_id) VALUES ($1, $2)`, [users.ops1, policyIds[0]]);
+
 
     // ── Badges ──────────────────────────────────────────
     console.log('🏅 Creating badges...');
@@ -258,13 +260,10 @@ async function seed() {
 
     // ── Compliance Issues ───────────────────────────────
     console.log('⚠️ Creating compliance issues...');
-    await client.query(`
-      INSERT INTO compliance_issues (title, description, audit_id, owner_id, severity, status, due_date, is_overdue, resolved_at, resolution) VALUES
-        ('Fleet Emission Target Exceeded', 'Q2 fleet emissions exceeded target by 15%.', $1, $3, 'HIGH', 'IN_PROGRESS', '2026-07-31', false, NULL, NULL),
-        ('Missing Safety Training Records', '12 employees have not completed mandatory training.', $1, $4, 'MEDIUM', 'OPEN', '2026-07-15', false, NULL, NULL),
-        ('Data Retention Policy Violation', 'Customer data found beyond 24-month retention limit.', NULL, $5, 'CRITICAL', 'OPEN', '2026-07-10', true, NULL, NULL),
-        ('Waste Segregation Non-Compliance', 'Factory floor waste bins not properly labeled.', $1, $3, 'LOW', 'RESOLVED', '2026-06-30', false, '2026-06-28', 'New bins installed. Staff training completed.')
-    `, [auditIds[0], null, users['ops.head'], users['hr.head'], users.head]);
+    await client.query(`INSERT INTO compliance_issues (title, description, audit_id, owner_id, severity, status, due_date, is_overdue, resolved_at, resolution) VALUES ($1, 'Q2 fleet emissions exceeded target by 15%.', $2, $3, 'HIGH', 'IN_PROGRESS', '2026-07-31', false, NULL, NULL)`, ['Fleet Emission Target Exceeded', auditIds[0], users['ops.head']]);
+    await client.query(`INSERT INTO compliance_issues (title, description, audit_id, owner_id, severity, status, due_date, is_overdue, resolved_at, resolution) VALUES ($1, '12 employees have not completed mandatory training.', $2, $3, 'MEDIUM', 'OPEN', '2026-07-15', false, NULL, NULL)`, ['Missing Safety Training Records', auditIds[0], users['hr.head']]);
+    await client.query(`INSERT INTO compliance_issues (title, description, audit_id, owner_id, severity, status, due_date, is_overdue, resolved_at, resolution) VALUES ($1, 'Customer data found beyond 24-month retention limit.', NULL, $2, 'CRITICAL', 'OPEN', '2026-07-10', true, NULL, NULL)`, ['Data Retention Policy Violation', users.head]);
+    await client.query(`INSERT INTO compliance_issues (title, description, audit_id, owner_id, severity, status, due_date, is_overdue, resolved_at, resolution) VALUES ($1, 'Factory floor waste bins not properly labeled.', $2, $3, 'LOW', 'RESOLVED', '2026-06-30', false, '2026-06-28', 'New bins installed. Staff training completed.')`, ['Waste Segregation Non-Compliance', auditIds[0], users['ops.head']]);
 
     // ── Department Scores ───────────────────────────────
     console.log('📈 Creating department scores...');
