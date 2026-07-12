@@ -29,7 +29,17 @@ const getCSRActivities = async (req, res, next) => {
     `;
     const countSql = `SELECT COUNT(*) as total FROM csr_activities a WHERE ${where}`;
     const [result, countResult] = await Promise.all([query(sql, params), query(countSql, params)]);
-    res.json({ success: true, data: result.rows, pagination: { total: parseInt(countResult.rows[0].total), page: parseInt(page), limit: parseInt(limit) } });
+
+    const userParts = await query('SELECT activity_id, status FROM employee_participations WHERE user_id = $1', [req.user.id]);
+    const partMap = {};
+    userParts.rows.forEach(p => { partMap[p.activity_id] = p.status; });
+
+    const enriched = result.rows.map(a => ({
+      ...a,
+      my_status: partMap[a.id] || null
+    }));
+
+    res.json({ success: true, data: enriched, pagination: { total: parseInt(countResult.rows[0].total), page: parseInt(page), limit: parseInt(limit) } });
   } catch (error) { next(error); }
 };
 

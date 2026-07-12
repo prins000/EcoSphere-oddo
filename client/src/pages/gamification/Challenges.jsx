@@ -200,31 +200,36 @@ export default function Challenges() {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-auto">
+                <div className="flex flex-col gap-2 mt-auto">
                   {ch.status === 'ACTIVE' && !ch.my_status && (
                     <button onClick={() => handleJoin(ch.id)} disabled={joining === ch.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-eco-amber/20 text-eco-amber text-xs font-medium hover:bg-eco-amber/30 disabled:opacity-40 transition-all">
+                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-eco-amber/20 text-eco-amber text-xs font-medium hover:bg-eco-amber/30 disabled:opacity-40 transition-all">
                       {joining === ch.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
                       Join Challenge
                     </button>
                   )}
                   {ch.status === 'ACTIVE' && ch.my_status && !ch.my_completed && (
-                    <div className="flex gap-2 flex-1">
-                      <input
-                        type="number"
-                        value={progressInputs[ch.id] || ''}
-                        onChange={e => setProgressInputs(p => ({ ...p, [ch.id]: e.target.value }))}
-                        placeholder={`Progress (${ch.unit})`}
-                        className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-eco-amber/50 transition-all"
-                      />
-                      <button onClick={() => handleUpdateProgress(ch.id)} disabled={updating === ch.id || !progressInputs[ch.id]}
-                        className="px-3 py-2 rounded-lg bg-eco-amber/20 text-eco-amber text-xs font-medium hover:bg-eco-amber/30 disabled:opacity-40 transition-all">
-                        {updating === ch.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                    <>
+                      <button disabled className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-slate-400 text-xs font-medium opacity-50 cursor-not-allowed">
+                        <Check className="w-3 h-3" /> Participated
                       </button>
-                    </div>
+                      <div className="flex gap-2 w-full">
+                        <input
+                          type="number"
+                          value={progressInputs[ch.id] || ''}
+                          onChange={e => setProgressInputs(p => ({ ...p, [ch.id]: e.target.value }))}
+                          placeholder={`Progress (${ch.unit})`}
+                          className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-eco-amber/50 transition-all"
+                        />
+                        <button onClick={() => handleUpdateProgress(ch.id)} disabled={updating === ch.id || !progressInputs[ch.id]}
+                          className="px-3 py-2 rounded-lg bg-eco-amber/20 text-eco-amber text-xs font-medium hover:bg-eco-amber/30 disabled:opacity-40 transition-all">
+                          {updating === ch.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        </button>
+                      </div>
+                    </>
                   )}
                   {ch.my_completed && (
-                    <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-eco-emerald/10 text-eco-emerald text-xs font-medium">
+                    <div className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-eco-emerald/10 text-eco-emerald text-xs font-medium">
                       <Star className="w-3 h-3" /> Completed!
                     </div>
                   )}
