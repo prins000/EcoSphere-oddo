@@ -19,6 +19,8 @@ const {
   updateGoal,
   getProducts,
   createProduct,
+  updateProduct,
+  deleteProduct,
   getCategories,
 } = require('../controllers/environmental.controller');
 
@@ -33,10 +35,13 @@ router.get('/emission-factors', getEmissionFactors);
 router.post('/emission-factors', authorize('ADMIN', 'ESG_MANAGER'), createEmissionFactor);
 router.put('/emission-factors/:id', authorize('ADMIN', 'ESG_MANAGER'), updateEmissionFactor);
 
-// ── Carbon Transactions ───────────────────────────────────
+// ── Carbon Transactions ───────────────────────────────
 router.get('/carbon-transactions', getCarbonTransactions);
-router.post('/carbon-transactions', createCarbonTransaction); // Any authenticated user can log
+router.get('/carbon', getCarbonTransactions);           // alias
+router.post('/carbon-transactions', createCarbonTransaction);
+router.post('/carbon', createCarbonTransaction);         // alias
 router.get('/carbon-summary', getCarbonSummary);
+router.get('/carbon/summary', getCarbonSummary);         // alias
 
 // ── Environmental Goals ───────────────────────────────────
 router.get('/goals', getGoals);
@@ -46,5 +51,7 @@ router.put('/goals/:id', authorize('ADMIN', 'ESG_MANAGER', 'DEPARTMENT_HEAD'), u
 // ── Product ESG Profiles ──────────────────────────────────
 router.get('/products', getProducts);
 router.post('/products', authorize('ADMIN', 'ESG_MANAGER'), createProduct);
+router.put('/products/:id', authorize('ADMIN', 'ESG_MANAGER'), updateProduct);
+router.delete('/products/:id', authorize('ADMIN'), deleteProduct);
 
 module.exports = router;

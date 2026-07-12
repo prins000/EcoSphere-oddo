@@ -22,12 +22,15 @@ router.use(authenticate);
 
 // ── CSR Activities ────────────────────────────────────────
 router.get('/csr-activities', getCSRActivities);
+router.get('/csr', getCSRActivities);                       // alias
 router.get('/csr-activities/:id', getCSRActivity);
 router.post('/csr-activities', createCSRActivity);
+router.post('/csr', createCSRActivity);                     // alias
 router.put('/csr-activities/:id/status', authorize('ADMIN', 'ESG_MANAGER', 'DEPARTMENT_HEAD'), updateCSRStatus);
 
 // ── Participation ─────────────────────────────────────────
 router.post('/participate/:activityId', participateInActivity);
+router.post('/csr/:activityId/participate', participateInActivity);  // alias
 router.put('/participation/:id/approve', authorize('ADMIN', 'ESG_MANAGER', 'DEPARTMENT_HEAD'), approveParticipation);
 router.get('/my-participations', getMyParticipations);
 

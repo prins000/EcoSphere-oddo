@@ -39,7 +39,10 @@ router.put('/audits/:id', authorize('ADMIN', 'ESG_MANAGER'), updateAudit);
 
 // ── Compliance Issues ─────────────────────────────────────
 router.get('/compliance-issues', getComplianceIssues);
+router.get('/issues', getComplianceIssues);               // alias
 router.post('/compliance-issues', authorize('ADMIN', 'ESG_MANAGER', 'DEPARTMENT_HEAD'), createComplianceIssue);
+router.post('/issues', authorize('ADMIN', 'ESG_MANAGER', 'DEPARTMENT_HEAD'), createComplianceIssue); // alias
 router.put('/compliance-issues/:id', updateComplianceIssue);
+router.put('/issues/:id', updateComplianceIssue);         // alias
 
 module.exports = router;

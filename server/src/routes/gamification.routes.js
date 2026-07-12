@@ -12,6 +12,7 @@ const {
   createChallenge,
   joinChallenge,
   updateProgress,
+  updateChallengeStatus,
   getBadges,
   getRewards,
   redeemReward,
@@ -25,6 +26,8 @@ router.get('/challenges', getChallenges);
 router.post('/challenges', authorize('ADMIN', 'ESG_MANAGER'), createChallenge);
 router.post('/challenges/:id/join', joinChallenge);
 router.put('/challenges/:challengeId/progress', updateProgress);
+router.patch('/challenges/:challengeId/progress', updateProgress); // alias (frontend uses PATCH)
+router.put('/challenges/:id/status', authorize('ADMIN', 'ESG_MANAGER'), updateChallengeStatus);
 
 // ── Badges ────────────────────────────────────────────────
 router.get('/badges', getBadges);
