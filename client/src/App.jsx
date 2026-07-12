@@ -11,12 +11,15 @@ import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Reports from './pages/Reports';
 
 // Environmental
 import Departments from './pages/environmental/Departments';
 import Emissions from './pages/environmental/Emissions';
 import CarbonTracking from './pages/environmental/CarbonTracking';
 import Goals from './pages/environmental/Goals';
+import Products from './pages/environmental/Products';
 
 // Social
 import CSRActivities from './pages/social/CSRActivities';
@@ -84,6 +87,7 @@ function AppRoutes() {
         <Route path="environmental/emissions" element={<Emissions />} />
         <Route path="environmental/carbon" element={<CarbonTracking />} />
         <Route path="environmental/goals" element={<Goals />} />
+        <Route path="environmental/products" element={<Products />} />
 
         {/* Social */}
         <Route path="social/csr" element={<CSRActivities />} />
@@ -99,9 +103,8 @@ function AppRoutes() {
 
         {/* Tools */}
         <Route path="notifications" element={<Notifications />} />
-
-        {/* Settings - simple placeholder */}
-        <Route path="settings" element={<SettingsPage />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       {/* Catch-all */}
@@ -110,35 +113,6 @@ function AppRoutes() {
   );
 }
 
-// Simple settings page
-function SettingsPage() {
-  const { user } = useAuth();
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-sm text-slate-400 mt-1">Account and application preferences</p>
-      </div>
-      <div className="glass-card p-6 max-w-lg">
-        <h3 className="text-base font-semibold text-white mb-4">Account Info</h3>
-        <div className="space-y-3">
-          {[
-            { label: 'Full Name', value: `${user?.firstName} ${user?.lastName}` },
-            { label: 'Email', value: user?.email },
-            { label: 'Role', value: user?.role?.replace(/_/g, ' ') },
-            { label: 'Department', value: user?.departmentId ? `Dept #${user.departmentId}` : 'N/A' },
-            { label: 'XP Balance', value: `${user?.xp || 0} XP` },
-          ].map(s => (
-            <div key={s.label} className="flex items-center justify-between py-2 border-b border-white/5">
-              <span className="text-xs text-slate-500">{s.label}</span>
-              <span className="text-sm text-white">{s.value || '—'}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   return (
