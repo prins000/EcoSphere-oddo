@@ -29,8 +29,13 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE challenge_status AS ENUM ('UPCOMING', 'ACTIVE', 'COMPLETED', 'CANCELLED');
+  CREATE TYPE challenge_status AS ENUM ('DRAFT', 'UPCOMING', 'ACTIVE', 'UNDER_REVIEW', 'COMPLETED', 'CANCELLED', 'ARCHIVED');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Safely add new values if enum already exists
+DO $$ BEGIN ALTER TYPE challenge_status ADD VALUE IF NOT EXISTS 'DRAFT'; EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN ALTER TYPE challenge_status ADD VALUE IF NOT EXISTS 'UNDER_REVIEW'; EXCEPTION WHEN others THEN NULL; END $$;
+DO $$ BEGIN ALTER TYPE challenge_status ADD VALUE IF NOT EXISTS 'ARCHIVED'; EXCEPTION WHEN others THEN NULL; END $$;
 
 DO $$ BEGIN
   CREATE TYPE notification_type AS ENUM (
@@ -433,3 +438,26 @@ CREATE TABLE IF NOT EXISTS notifications (
 CREATE INDEX IF NOT EXISTS idx_notif_user_read ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_notif_type ON notifications(type);
 CREATE INDEX IF NOT EXISTS idx_notif_created ON notifications(created_at);
+
+-- ── Org Settings ────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS org_settings (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_name                 VARCHAR(255) DEFAULT 'EcoSphere',
+  env_weight               NUMERIC(5,2)  DEFAULT 40.00,
+  social_weight            NUMERIC(5,2)  DEFAULT 30.00,
+  governance_weight        NUMERIC(5,2)  DEFAULT 30.00,
+  auto_emission_calc       BOOLEAN       DEFAULT false,
+  evidence_required        BOOLEAN       DEFAULT false,
+  badge_auto_award         BOOLEAN       DEFAULT true,
+  notify_compliance        BOOLEAN       DEFAULT true,
+  notify_csr_approval      BOOLEAN       DEFAULT true,
+  notify_policy_reminder   BOOLEAN       DEFAULT true,
+  notify_badge_unlock      BOOLEAN       DEFAULT true,
+  notify_challenge         BOOLEAN       DEFAULT true,
+  created_at               TIMESTAMP     DEFAULT NOW(),
+  updated_at               TIMESTAMP     DEFAULT NOW()
+);
+
+-- Seed default settings row if none exists
+INSERT INTO org_settings (org_name) SELECT 'EcoSphere' WHERE NOT EXISTS (SELECT 1 FROM org_settings);
