@@ -1,76 +1,159 @@
-// ============================================================
-// EcoSphere ESG - Top Header Bar
-// Search, notifications, and quick actions
-// ============================================================
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import {
-  Search,
-  Bell,
-  Moon,
-  Sun,
-  Sparkles,
-} from 'lucide-react';
+import { Search, Bell, Menu } from 'lucide-react';
+import api from '../../services/api';
 
-export default function Header() {
+const PAGE_TITLES = {
+  '/': 'Dashboard',
+  '/environmental/departments': 'Departments',
+  '/environmental/emissions': 'Emission Factors',
+  '/environmental/carbon': 'Carbon Tracking',
+  '/environmental/goals': 'Environmental Goals',
+  '/social/csr': 'CSR Activities',
+  '/social/participation': 'Participation',
+  '/governance/policies': 'Policies',
+  '/governance/audits': 'Audits',
+  '/gamification/challenges': 'Challenges',
+  '/gamification/leaderboard': 'Leaderboard',
+  '/notifications': 'Notifications',
+  '/settings': 'Settings',
+};
+
+export default function Header({ onMenuClick, isMobile }) {
   const { user } = useAuth();
-  const [darkMode, setDarkMode] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const [unread, setUnread] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const title = PAGE_TITLES[location.pathname] || 'EcoSphere';
+
+  useEffect(() => {
+    api.get('/notifications?limit=1').then(r => {
+      setUnread(r.data.unreadCount || 0);
+    }).catch(() => {});
+  }, [location.pathname]);
 
   return (
-    <header className="h-16 glass-light flex items-center justify-between px-6 border-b border-white/5">
-      {/* ── Search ───────────────────────────────────────── */}
-      <div className="flex items-center gap-3 flex-1 max-w-md">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search ESG data..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-eco-emerald/50 focus:bg-white/8 transition-all"
-          />
-        </div>
+    <header style={{
+      height: 54,
+      background: '#0B1220',
+      borderBottom: '1px solid rgba(255,255,255,0.05)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: isMobile ? '0 16px' : '0 24px',
+      flexShrink: 0,
+      gap: 12,
+    }}>
+
+      {/* Left: Hamburger (mobile) + Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        {isMobile && (
+          <button
+            onClick={onMenuClick}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 32, height: 32, borderRadius: 8,
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.07)',
+              color: '#94A3B8', cursor: 'pointer', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#F8FAFC'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; }}
+          >
+            <Menu size={16} />
+          </button>
+        )}
+        <h2 style={{
+          fontSize: isMobile ? '0.875rem' : '0.9375rem',
+          fontWeight: 600,
+          color: '#F8FAFC',
+          letterSpacing: '-0.02em',
+          whiteSpace: 'nowrap',
+        }}>
+          {title}
+        </h2>
       </div>
 
-      {/* ── Right Actions ───────────────────────────────── */}
-      <div className="flex items-center gap-2">
-        {/* AI Insights button */}
-        <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-eco-purple/20 to-eco-blue/20 border border-eco-purple/20 text-eco-purple-light text-xs font-medium hover:from-eco-purple/30 hover:to-eco-blue/30 transition-all">
-          <Sparkles className="w-3.5 h-3.5" />
-          AI Insights
-        </button>
+      {/* Center: Search (hidden on small mobile unless expanded) */}
+      {!isMobile && (
+        <div style={{ position: 'relative', flex: '0 1 300px' }}>
+          <Search size={14} style={{
+            position: 'absolute', left: 10, top: '50%',
+            transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none',
+          }} />
+          <input
+            type="text"
+            placeholder="Search…"
+            style={{
+              width: '100%',
+              paddingLeft: 32, paddingRight: 40,
+              paddingTop: 7, paddingBottom: 7,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 8,
+              fontSize: '0.8125rem',
+              color: '#F8FAFC',
+              outline: 'none',
+              fontFamily: 'inherit',
+            }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(16,185,129,0.35)'; e.target.style.background = 'rgba(255,255,255,0.06)'; }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.07)'; e.target.style.background = 'rgba(255,255,255,0.04)'; }}
+          />
+          <span style={{
+            position: 'absolute', right: 10, top: '50%',
+            transform: 'translateY(-50%)',
+            fontSize: '0.6875rem', color: '#374151',
+            fontFamily: 'monospace',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 4, padding: '1px 5px',
+          }}>⌘K</span>
+        </div>
+      )}
 
-        {/* Dark mode toggle */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
-          title="Toggle theme"
-        >
-          {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+      {/* Right: Search icon (mobile) + Notifications + Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+
+        {/* Mobile search icon */}
+        {isMobile && (
+          <button style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 32, height: 32, borderRadius: 8,
+            background: 'transparent', border: '1px solid rgba(255,255,255,0.07)',
+            color: '#64748B', cursor: 'pointer',
+          }}>
+            <Search size={15} />
+          </button>
+        )}
 
         {/* Notifications */}
-        <button className="relative p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all">
-          <Bell className="w-5 h-5" />
-          {/* Unread badge */}
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-eco-rose animate-pulse" />
+        <button style={{
+          position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 32, height: 32, borderRadius: 8, background: 'transparent',
+          border: '1px solid rgba(255,255,255,0.07)', color: '#64748B', cursor: 'pointer',
+          transition: 'color 0.15s, border-color 0.15s',
+        }}>
+          <Bell size={15} />
+          {unread > 0 && (
+            <span style={{
+              position: 'absolute', top: 5, right: 5,
+              width: 6, height: 6, borderRadius: '50%', background: '#10B981',
+            }} />
+          )}
         </button>
 
-        {/* User avatar */}
-        <div className="flex items-center gap-3 ml-2 pl-3 border-l border-white/10">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-eco-emerald to-eco-teal flex items-center justify-center text-white text-sm font-bold">
-            {user?.firstName?.[0]}{user?.lastName?.[0]}
-          </div>
-          <div className="hidden md:block">
-            <p className="text-sm font-medium text-slate-200">
-              {user?.firstName} {user?.lastName}
-            </p>
-            <p className="text-[10px] text-slate-500">
-              {user?.role?.replace('_', ' ')}
-            </p>
-          </div>
+        {/* Divider */}
+        {!isMobile && <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.06)' }} />}
+
+        {/* Avatar */}
+        <div style={{
+          width: 28, height: 28, borderRadius: 8,
+          background: '#1F2937',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '0.6875rem', fontWeight: 600, color: '#94A3B8',
+          border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', flexShrink: 0,
+        }}>
+          {user?.firstName?.[0]}{user?.lastName?.[0]}
         </div>
       </div>
     </header>

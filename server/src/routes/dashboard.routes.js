@@ -11,6 +11,8 @@ router.use(authenticate);
 
 router.get('/overview', getOverview);
 router.get('/department-rankings', getDepartmentRankings);
+router.get('/rankings', getDepartmentRankings);          // alias
 router.get('/activity-feed', getActivityFeed);
+router.get('/activity', getActivityFeed);                // alias
 
 module.exports = router;

@@ -68,28 +68,28 @@ export default function Emissions() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h1 className="text-2xl font-bold text-white">Emission Factors</h1>
           <p className="text-sm text-slate-400 mt-1">CO₂ equivalent coefficients for carbon calculations</p>
         </div>
         {isManager && (
           <button onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-eco-emerald to-eco-blue text-white text-sm font-medium hover:shadow-lg transition-all">
-            <Plus className="w-4 h-4" /> Add Factor
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-eco-emerald to-eco-blue text-white text-sm font-medium hover:shadow-lg transition-all" style={{ flexShrink: 0 }}>
+            <Plus className="w-4 h-4" /> <span>Add Factor</span>
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        <div className="relative" style={{ flex: '1 1 160px', minWidth: 0 }}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search factors..."
-            className="pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-eco-emerald/50 transition-all" />
+            className="pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-eco-emerald/50 transition-all" style={{ width: '100%' }} />
         </div>
         <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
-          className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 focus:outline-none focus:border-eco-emerald/50 transition-all">
+          className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300 focus:outline-none focus:border-eco-emerald/50 transition-all" style={{ flex: '0 1 auto' }}>
           <option value="">All Sources</option>
           {SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -97,7 +97,7 @@ export default function Emissions() {
 
       {/* Table */}
       <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="table-responsive">
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
