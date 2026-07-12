@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Leaf, Users, Shield, Trophy,
   Bell, Settings, LogOut, Factory, Target,
   HandHeart, Scale, BarChart2, Globe, X,
+  BarChart3, Package,
 } from 'lucide-react';
 
 const NAV = [
@@ -15,6 +16,7 @@ const NAV = [
   { path: '/environmental/carbon',      icon: Leaf,     label: 'Carbon' },
   { path: '/environmental/goals',       icon: Target,   label: 'Goals' },
   { path: '/environmental/emissions',   icon: Globe,    label: 'Emissions' },
+  { path: '/environmental/products',    icon: Package,  label: 'Products' },
   null,
   { label: 'Social', group: true },
   { path: '/social/csr',           icon: HandHeart, label: 'CSR Activities' },
@@ -24,9 +26,12 @@ const NAV = [
   { path: '/governance/policies', icon: Shield, label: 'Policies' },
   { path: '/governance/audits',   icon: Scale,  label: 'Audits' },
   null,
-  { label: 'Rewards', group: true },
+  { label: 'Gamification', group: true },
   { path: '/gamification/challenges',  icon: BarChart2, label: 'Challenges' },
   { path: '/gamification/leaderboard', icon: Trophy,    label: 'Leaderboard' },
+  null,
+  { label: 'Reports', group: true },
+  { path: '/reports', icon: BarChart3, label: 'Reports' },
 ];
 
 export default function Sidebar({ isMobile, isOpen, onClose }) {

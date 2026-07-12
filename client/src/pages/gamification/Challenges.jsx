@@ -5,13 +5,27 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { Trophy, Plus, X, Check, Loader2, Users, Target, Zap, Clock, Star } from 'lucide-react';
+import { Trophy, Plus, X, Check, Loader2, Users, Target, Zap, Clock, Star, ChevronRight } from 'lucide-react';
 
 const STATUS_CFG = {
-  ACTIVE: { color: 'bg-eco-emerald/20 text-eco-emerald border-eco-emerald/30', label: 'Active' },
-  UPCOMING: { color: 'bg-eco-blue/20 text-eco-blue border-eco-blue/30', label: 'Upcoming' },
-  COMPLETED: { color: 'bg-eco-purple/20 text-eco-purple border-eco-purple/30', label: 'Completed' },
-  CANCELLED: { color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', label: 'Cancelled' },
+  DRAFT:        { color: 'bg-slate-700/40 text-slate-300 border-slate-600/30', label: 'Draft' },
+  UPCOMING:     { color: 'bg-eco-blue/20 text-eco-blue border-eco-blue/30', label: 'Upcoming' },
+  ACTIVE:       { color: 'bg-eco-emerald/20 text-eco-emerald border-eco-emerald/30', label: 'Active' },
+  UNDER_REVIEW: { color: 'bg-eco-amber/20 text-eco-amber border-eco-amber/30', label: 'Under Review' },
+  COMPLETED:    { color: 'bg-eco-purple/20 text-eco-purple border-eco-purple/30', label: 'Completed' },
+  CANCELLED:    { color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', label: 'Cancelled' },
+  ARCHIVED:     { color: 'bg-slate-800/40 text-slate-500 border-slate-700/30', label: 'Archived' },
+};
+
+// Valid transitions for manager
+const TRANSITIONS = {
+  DRAFT:        ['ACTIVE', 'ARCHIVED'],
+  UPCOMING:     ['ACTIVE', 'CANCELLED', 'ARCHIVED'],
+  ACTIVE:       ['UNDER_REVIEW', 'COMPLETED', 'CANCELLED', 'ARCHIVED'],
+  UNDER_REVIEW: ['COMPLETED', 'ACTIVE', 'CANCELLED', 'ARCHIVED'],
+  COMPLETED:    ['ARCHIVED'],
+  CANCELLED:    ['ARCHIVED'],
+  ARCHIVED:     [],
 };
 
 const TYPE_CFG = {
@@ -74,17 +88,30 @@ export default function Challenges() {
     } finally { setUpdating(null); }
   }
 
+  const [saveAsDraft, setSaveAsDraft] = useState(false);
+
   async function handleCreate(e) {
     e.preventDefault();
     setSaving(true); setError('');
     try {
-      await api.post('/gamification/challenges', form);
-      setShowModal(false);
+      const payload = { ...form };
+      if (saveAsDraft) payload.status = 'DRAFT';
+      await api.post('/gamification/challenges', payload);
+      setShowModal(false); setSaveAsDraft(false);
       setForm({ title: '', description: '', type: 'environmental', xpReward: 100, targetValue: '', unit: '', startDate: '', endDate: '', maxParticipants: '' });
       fetchChallenges();
     } catch (e) {
       setError(e.response?.data?.message || 'Failed to create challenge');
-    } finally { setSaving(false); }
+    } finally { setSaving(false); setSaveAsDraft(false); }
+  }
+
+  async function handleStatusChange(challengeId, newStatus) {
+    try {
+      await api.put(`/gamification/challenges/${challengeId}/status`, { status: newStatus });
+      fetchChallenges();
+    } catch (e) {
+      alert(e.response?.data?.message || 'Status change failed');
+    }
   }
 
   return (
@@ -209,6 +236,24 @@ export default function Challenges() {
                     🏅 Earn badge: <span className="text-slate-500">{ch.badge_name}</span>
                   </p>
                 )}
+
+                {/* Manager lifecycle controls */}
+                {isManager && TRANSITIONS[ch.status]?.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-white/5">
+                    <p className="text-[10px] text-slate-600 mb-1.5 font-medium">Move to:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TRANSITIONS[ch.status].map(next => {
+                        const nextCfg = STATUS_CFG[next];
+                        return (
+                          <button key={next} onClick={() => handleStatusChange(ch.id, next)}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-all hover:opacity-80 ${nextCfg?.color}`}>
+                            <ChevronRight className="w-2.5 h-2.5" /> {nextCfg?.label || next}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -280,8 +325,15 @@ export default function Challenges() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-400 text-sm hover:bg-white/5 transition-all">Cancel</button>
-                <button type="submit" disabled={saving}
+                  className="py-2.5 px-4 rounded-xl border border-white/10 text-slate-400 text-sm hover:bg-white/5 transition-all">Cancel</button>
+                <button type="button" disabled={saving} onClick={() => {
+                    setSaveAsDraft(true);
+                    setTimeout(() => document.getElementById('challengeSubmit').click(), 0);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/10 disabled:opacity-50 transition-all">
+                  Save as Draft
+                </button>
+                <button id="challengeSubmit" type="submit" disabled={saving}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-eco-amber to-eco-rose text-white text-sm font-medium disabled:opacity-50 transition-all">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Create
                 </button>

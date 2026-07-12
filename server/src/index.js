@@ -23,6 +23,8 @@ const governanceRoutes = require('./routes/governance.routes');
 const gamificationRoutes = require('./routes/gamification.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const reportsRoutes = require('./routes/reports.routes');
 
 // Import cron jobs
 const detectOverdueIssues = require('./cron/overdueDetection');
@@ -91,6 +93,8 @@ app.use('/api/governance', governanceRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api', settingsRoutes);         // /api/settings, /api/categories, /api/users
+app.use('/api/reports', reportsRoutes);  // /api/reports/*
 
 // ── Error Handling ───────────────────────────────────────────
 app.use(notFoundHandler);
