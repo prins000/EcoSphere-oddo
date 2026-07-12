@@ -250,6 +250,35 @@ const createProduct = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
+const updateProduct = async (req, res, next) => {
+  try {
+    const { productName, productCode, emissionFactorId, carbonFootprint, recyclablePercent, sustainableSource, ecoLabel, lifecycleStage, description } = req.body;
+    const sets = []; const params = []; let idx = 1;
+    if (productName) { sets.push(`product_name=$${idx++}`); params.push(productName); }
+    if (productCode) { sets.push(`product_code=$${idx++}`); params.push(productCode); }
+    if (emissionFactorId !== undefined) { sets.push(`emission_factor_id=$${idx++}`); params.push(emissionFactorId || null); }
+    if (carbonFootprint !== undefined) { sets.push(`carbon_footprint=$${idx++}`); params.push(parseFloat(carbonFootprint)); }
+    if (recyclablePercent !== undefined) { sets.push(`recyclable_percent=$${idx++}`); params.push(parseFloat(recyclablePercent)); }
+    if (sustainableSource !== undefined) { sets.push(`sustainable_source=$${idx++}`); params.push(sustainableSource); }
+    if (ecoLabel !== undefined) { sets.push(`eco_label=$${idx++}`); params.push(ecoLabel); }
+    if (lifecycleStage) { sets.push(`lifecycle_stage=$${idx++}`); params.push(lifecycleStage); }
+    if (description !== undefined) { sets.push(`description=$${idx++}`); params.push(description); }
+    sets.push('updated_at=NOW()');
+    params.push(req.params.id);
+    const result = await query(`UPDATE product_esg_profiles SET ${sets.join(',')} WHERE id=$${idx} RETURNING *`, params);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Product not found.' });
+    res.json({ success: true, message: 'Product updated.', data: result.rows[0] });
+  } catch (error) { next(error); }
+};
+
+const deleteProduct = async (req, res, next) => {
+  try {
+    const result = await query('DELETE FROM product_esg_profiles WHERE id=$1 RETURNING id', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Product not found.' });
+    res.json({ success: true, message: 'Product deleted.' });
+  } catch (error) { next(error); }
+};
+
 // ── CATEGORIES ────────────────────────────────────────────────
 
 const getCategories = async (req, res, next) => {
@@ -268,5 +297,5 @@ module.exports = {
   getEmissionFactors, createEmissionFactor, updateEmissionFactor,
   getCarbonTransactions, createCarbonTransaction, getCarbonSummary,
   getGoals, createGoal, updateGoal,
-  getProducts, createProduct, getCategories,
-};
+  getProducts, createProduct, updateProduct, deleteProduct, getCategories,
+};
