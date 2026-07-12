@@ -244,4 +244,27 @@ const getLeaderboard = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-module.exports = { getChallenges, createChallenge, joinChallenge, updateProgress, getBadges, getRewards, redeemReward, getLeaderboard };
+// ── UPDATE CHALLENGE STATUS ──────────────────────────────────────
+
+const updateChallengeStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['DRAFT', 'UPCOMING', 'ACTIVE', 'UNDER_REVIEW', 'COMPLETED', 'CANCELLED', 'ARCHIVED'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    const result = await query(
+      'UPDATE challenges SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING *',
+      [status, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Challenge not found.' });
+    }
+
+    res.json({ success: true, message: `Challenge status updated to ${status}.`, data: result.rows[0] });
+  } catch (error) { next(error); }
+};
+
+module.exports = { getChallenges, createChallenge, joinChallenge, updateProgress, updateChallengeStatus, getBadges, getRewards, redeemReward, getLeaderboard };

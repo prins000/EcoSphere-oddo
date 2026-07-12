@@ -28,8 +28,15 @@ async function seed() {
       TRUNCATE notifications, reward_redemptions, user_badges, challenge_participations,
       employee_participations, policy_acknowledgements, compliance_issues, department_scores,
       carbon_transactions, product_esg_profiles, environmental_goals, audits, challenges,
-      csr_activities, esg_policies, emission_factors, rewards, badges, categories, users, departments
+      csr_activities, esg_policies, emission_factors, rewards, badges, categories, users, departments, org_settings
       CASCADE
+    `);
+
+    // ── Org Settings ───────────────────────────────────
+    console.log('⚙️  Seeding org settings...');
+    await client.query(`
+      INSERT INTO org_settings (org_name, env_weight, social_weight, governance_weight, badge_auto_award, evidence_required)
+      VALUES ('EcoSphere Demo Org', 40, 30, 30, true, false)
     `);
 
     // ── Departments ─────────────────────────────────────
