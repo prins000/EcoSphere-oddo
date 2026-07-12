@@ -38,13 +38,27 @@ app.use(cors({
   credentials: true,
 }));
 
-// ── Rate Limiting ────────────────────────────────────────────
+// ── Rate Limiting ────────────────────────────────────
+// General API limiter (lenient in dev)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 300 : 2000,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many requests. Please try again later.' },
+  skip: (req) => req.method === 'GET', // Never rate-limit GET requests in dev
 });
 app.use('/api/', limiter);
+
+// Auth-specific limiter (stricter — protects against brute force)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 20 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts. Please wait 15 minutes.' },
+});
+app.use('/api/auth/login', authLimiter);
 
 // ── Body Parsing ─────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
